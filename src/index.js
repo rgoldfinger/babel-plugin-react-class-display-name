@@ -2,7 +2,8 @@ export default function ({ Plugin, types: t }) {
   return new Plugin("react-class-display-name", {
     visitor: {
       ClassDeclaration(node, parent, scope, file) {
-          if (this.get("superClass").matchesPattern("React.Component")) {
+          const superClass = this.get("superClass");
+          if (superClass.matchesPattern("React.Component") || superClass.matchesPattern("React.PureComponent")) {
               (parent.type === 'ExportDefaultDeclaration' ? this.parentPath : this).insertAfter([ // take the "export default class ..." form into account
                   t.expressionStatement(t.assignmentExpression(
                       "=",
