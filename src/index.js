@@ -1,18 +1,13 @@
-export default function ({ Plugin, types: t }) {
-  return new Plugin("react-class-display-name", {
+export default function ({ types: t }) {
+  return {
     visitor: {
-      ClassDeclaration(node, parent, scope, file) {
-          const superClass = this.get("superClass");
+      ClassDeclaration(path) {
+          const superClass = path.get("superClass");
           if (superClass.matchesPattern("React.Component") || superClass.matchesPattern("React.PureComponent")) {
-              (parent.type === 'ExportDefaultDeclaration' ? this.parentPath : this).insertAfter([ // take the "export default class ..." form into account
-                  t.expressionStatement(t.assignmentExpression(
-                      "=",
-                      t.memberExpression(node.id, t.identifier("displayName")),
-                      t.literal(node.id.name)
-                  ))
-              ]);
+              const body = path.get('body');
+              body.pushContainer('body', t.classProperty(t.identifier("displayName"), t.stringLiteral(path.node.id.name)));
           }
       }
     }
-  });
+  };
 }
